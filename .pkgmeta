@@ -1,0 +1,5 @@
+package-as: SafeQueue
+
+manual-changelog:
+    filename: README.md
+    markup-type: markdown
