@@ -8,5 +8,8 @@ https://github.com/jordonwow/safequeue/issues
 Submit a pull request:
 https://github.com/jordonwow/safequeue/pulls
 
+## v3.1
+* Fix the need to click the Enter Battle button twice
+
 ## v3.0
 * Update for Classic

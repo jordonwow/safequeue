@@ -4,7 +4,7 @@ local addonName, addon = ...
 
 local SAFEQUEUE_NUMPOPUPS = 3
 local TOOLTIP_UPDATE_TIME = TOOLTIP_UPDATE_TIME
-local EXPIRES_FORMAT = "Expires in |cf%s%s|r"
+local EXPIRES_FORMAT = "SafeQueue expires in |cf%s%s|r"
 local ANNOUNCE_FORMAT = "Queue popped %s"
 local ENTER_BATTLE = ENTER_BATTLE
 local PLAYER = PLAYER
@@ -95,7 +95,6 @@ end
 function SafeQueue_OnShow(self)
     SafeQueue_UpdateTimer(self)
     self.SubText:SetText(self.battleground)
-    self.EnterButton:SetText("SafeQueue")
 end
 
 function SafeQueue_FindPopup(battlegroundId)
@@ -148,21 +147,12 @@ function SafeQueue_PreClick(self)
 
     if (not button) then
         self:SetAttribute("macrotext", "/click MiniMapBattlefieldFrame RightButton\n" ..
-            "/click MiniMapBattlefieldFrame RightButton\n" ..
-            "/click " .. self:GetName() -- was worth a shot
+            "/click MiniMapBattlefieldFrame RightButton"
         )
         return
     end
 
     self:SetAttribute("macrotext", "/click " .. button:GetName())
-end
-
-function SafeQueue_PostClick(self)
-    if InCombatLockdown() then return end
-    local battleground = self:GetParent().battleground
-    if (not battleground) then return end
-    local button = SafeQueue.buttons[self:GetParent().battleground]
-    if button then self:SetText(ENTER_BATTLE) end
 end
 
 hooksecurefunc("ToggleDropDownMenu", function(_, _, dropDownFrame)
