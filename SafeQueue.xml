@@ -94,7 +94,7 @@
 </Frame>
 <Frame name="SafeQueuePopup3" inherits="SafeQueuePopupTemplate" parent="UIParent" id="3">
     <Anchors>
-        <Anchor point="TOP" relativeTo="SafeQueuePopup1" relativePoint="BOTTOM"/>
+        <Anchor point="TOP" relativeTo="SafeQueuePopup2" relativePoint="BOTTOM"/>
     </Anchors>
 </Frame>
 </Ui>
