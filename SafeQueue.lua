@@ -62,6 +62,7 @@ function SafeQueue:UPDATE_BATTLEFIELD_STATUS()
 end
 
 function SafeQueue:RefreshDropdown()
+    if (not self.dropdownActive) then return end
     for i = 1, 10 do
         local button = _G["DropDownList1Button" .. i]
         if (not button) then break end
@@ -134,6 +135,11 @@ function SafeQueue_OnUpdate(self, elapsed)
     self.timer = timer
 end
 
+function SafeQueue:GetButton(battleground)
+    if (not self.dropdownActive) then return end
+    return SafeQueue.buttons[battleground]
+end
+
 function SafeQueue_PreClick(self)
     SafeQueue:RefreshDropdown()
 
@@ -143,7 +149,7 @@ function SafeQueue_PreClick(self)
 
     if UnitInBattleground(PLAYER) then return end
 
-    local button = SafeQueue.buttons[self:GetParent().battleground]
+    local button = SafeQueue:GetButton(self:GetParent().battleground)
 
     if (not button) then
         self:SetAttribute("macrotext", "/click MiniMapBattlefieldFrame RightButton\n" ..
@@ -156,9 +162,8 @@ function SafeQueue_PreClick(self)
 end
 
 hooksecurefunc("ToggleDropDownMenu", function(_, _, dropDownFrame)
-    if dropDownFrame == MiniMapBattlefieldDropDown then
-        SafeQueue:RefreshDropdown()
-    end
+    SafeQueue.dropdownActive = dropDownFrame == MiniMapBattlefieldDropDown
+    SafeQueue:RefreshDropdown()
 end)
 
 hooksecurefunc("StaticPopup_Show", function(name)
