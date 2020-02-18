@@ -79,7 +79,8 @@ function SafeQueue:RefreshDropdown()
 end
 
 function SafeQueue_Hide(self)
-    SafeQueue.buttons[self.battleground] = nil
+    if self.debug then return end
+    if self.battleground then SafeQueue.buttons[self.battleground] = nil end
     self.battleground = nil
     self.battlegroundId = nil
     self:Hide()
@@ -113,6 +114,7 @@ function SafeQueue_FindPopup(battlegroundId)
 end
 
 function SafeQueue_UpdateTimer(self)
+    if (not self.battlegroundId) then return end
     local secs = GetBattlefieldPortExpiration(self.battlegroundId)
     if secs <= 0 then secs = 1 end
     local color
