@@ -2,24 +2,29 @@ if WOW_PROJECT_ID ~= WOW_PROJECT_CLASSIC then return end
 
 local addonName, addon = ...
 
+local C_Map = C_Map
+local CreateFrame = CreateFrame
+local DEFAULT_CHAT_FRAME = DEFAULT_CHAT_FRAME
+local ENTER_BATTLE = ENTER_BATTLE
+local GetBattlefieldPortExpiration = GetBattlefieldPortExpiration
+local GetBattlefieldStatus = GetBattlefieldStatus
+local GetBattlefieldTimeWaited = GetBattlefieldTimeWaited
+local GetMaxBattlefieldID = GetMaxBattlefieldID
+local GetTime = GetTime
+local InCombatLockdown = InCombatLockdown
+local MiniMapBattlefieldDropDown = MiniMapBattlefieldDropDown
+local PLAYER = PLAYER
+local SecondsToTime = SecondsToTime
+local UnitInBattleground = UnitInBattleground
+local hooksecurefunc = hooksecurefunc
+
 local SAFEQUEUE_NUMPOPUPS = 3
 local TOOLTIP_UPDATE_TIME = TOOLTIP_UPDATE_TIME
 local EXPIRES_FORMAT = "SafeQueue expires in |cf%s%s|r"
 local ANNOUNCE_FORMAT = "Queue popped %s"
-local ENTER_BATTLE = ENTER_BATTLE
-local PLAYER = PLAYER
-local GetBattlefieldStatus = GetBattlefieldStatus
-local GetBattlefieldPortExpiration = GetBattlefieldPortExpiration
-local GetMaxBattlefieldID = GetMaxBattlefieldID
-local InCombatLockdown = InCombatLockdown
-local UnitInBattleground = UnitInBattleground
-local MiniMapBattlefieldDropDown = MiniMapBattlefieldDropDown
-local CreateFrame = CreateFrame
-local SecondsToTime = SecondsToTime
-local hooksecurefunc = hooksecurefunc
-local DEFAULT_CHAT_FRAME = DEFAULT_CHAT_FRAME
-local GetTime = GetTime
-local GetBattlefieldTimeWaited = GetBattlefieldTimeWaited
+local ALTERAC_VALLEY = C_Map.GetMapInfo(1459).name
+local WARSONG_GULCH = C_Map.GetMapInfo(1460).name
+local ARATHI_BASIN = C_Map.GetMapInfo(1461).name
 
 local SafeQueue = CreateFrame("Frame", "SafeQueue")
 SafeQueue:SetScript("OnEvent", function(self, event, ...) self[event](self, ...) end)
@@ -137,7 +142,7 @@ end
 
 function SafeQueue:GetButton(battleground)
     if (not self.dropdownActive) then return end
-    return SafeQueue.buttons[battleground]
+    return self.buttons[battleground]
 end
 
 function SafeQueue_PreClick(self)
