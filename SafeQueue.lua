@@ -25,6 +25,11 @@ local ANNOUNCE_FORMAT = "Queue popped %s"
 local ALTERAC_VALLEY = C_Map.GetMapInfo(1459).name
 local WARSONG_GULCH = C_Map.GetMapInfo(1460).name
 local ARATHI_BASIN = C_Map.GetMapInfo(1461).name
+local COLORS = {
+    [ALTERAC_VALLEY] = { r = 0, g = 0.5, b = 1 },
+    [WARSONG_GULCH] = { r = 0, g = 1, b = 0 },
+    [ARATHI_BASIN] = { r = 1, g = 0.82, b = 0 },
+}
 
 local SafeQueue = CreateFrame("Frame", "SafeQueue")
 SafeQueue:SetScript("OnEvent", function(self, event, ...) self[event](self, ...) end)
@@ -102,6 +107,8 @@ end
 function SafeQueue_OnShow(self)
     SafeQueue_UpdateTimer(self)
     self.SubText:SetText(self.battleground)
+    local color = COLORS[self.battleground]
+    if color then self.SubText:SetTextColor(color.r, color.g, color.b) end
 end
 
 function SafeQueue_FindPopup(battlegroundId)

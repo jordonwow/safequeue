@@ -2,7 +2,7 @@
 ..\FrameXML\UI.xsd">
 <Frame name="SafeQueuePopupTemplate" toplevel="true" enableKeyboard="true" enableMouse="true" frameStrata="DIALOG" hidden="true" hyperlinksEnabled="true" virtual="true">
     <Size>
-        <AbsDimension x="320" y="115"/>
+        <AbsDimension x="320" y="124"/>
     </Size>
     <Scripts>
         <OnLoad>
@@ -36,10 +36,10 @@
                     </Anchor>
                 </Anchors>
             </FontString>
-            <FontString name="$parentSubText" parentKey="SubText" inherits="GameFontNormalSmall">
+            <FontString name="$parentSubText" parentKey="SubText" inherits="GameFontNormal">
                 <Size x="290" y="0"/>
                 <Anchors>
-                    <Anchor point="TOP" relativeKey="$parent.text" relativePoint="BOTTOM" x="0" y="-10"/>
+                    <Anchor point="TOP" relativeKey="$parent.text" relativePoint="BOTTOM" x="0" y="-13"/>
                 </Anchors>
             </FontString>
         </Layer>
