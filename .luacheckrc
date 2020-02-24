@@ -44,6 +44,7 @@ globals = {
     "SafeQueue_UpdateTimer",
     "SecondsToTime",
     "StaticPopup_Hide",
+    "StaticPopup_Visible",
     "TOOLTIP_UPDATE_TIME",
     "UnitInBattleground",
     "WOW_PROJECT_CLASSIC",

@@ -8,6 +8,9 @@ https://github.com/jordonwow/safequeue/issues
 Submit a pull request:
 https://github.com/jordonwow/safequeue/pulls
 
+## v3.4
+* Fix popup not showing in combat
+
 ## v3.3
 * Colorize battleground text
 

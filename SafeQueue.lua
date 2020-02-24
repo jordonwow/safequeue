@@ -15,6 +15,7 @@ local InCombatLockdown = InCombatLockdown
 local MiniMapBattlefieldDropDown = MiniMapBattlefieldDropDown
 local PLAYER = PLAYER
 local SecondsToTime = SecondsToTime
+local StaticPopup_Visible = StaticPopup_Visible
 local UnitInBattleground = UnitInBattleground
 local hooksecurefunc = hooksecurefunc
 
@@ -34,8 +35,10 @@ local COLORS = {
 local SafeQueue = CreateFrame("Frame", "SafeQueue")
 SafeQueue:SetScript("OnEvent", function(self, event, ...) self[event](self, ...) end)
 SafeQueue:RegisterEvent("UPDATE_BATTLEFIELD_STATUS")
+SafeQueue:RegisterEvent("PLAYER_REGEN_ENABLED")
 SafeQueue.buttons = {}
 SafeQueue.queues = {}
+SafeQueue.createQueue = {}
 
 function SafeQueue:Print(message)
     DEFAULT_CHAT_FRAME:AddMessage("|cff33ff99SafeQueue|r: " .. message)
@@ -58,7 +61,7 @@ function SafeQueue:UPDATE_BATTLEFIELD_STATUS()
                 self.queues[i] = nil
             end
             if (not popup) then
-                SafeQueue_Show(i)
+                self:Create(i)
             end
         else
             if status == "queued" then
@@ -91,16 +94,31 @@ function SafeQueue_Hide(self)
     self:Hide()
 end
 
-function SafeQueue_Show(battlegroundId)
-    local _, battleground = GetBattlefieldStatus(battlegroundId)
+function SafeQueue:Create(battlegroundId)
+    local status, battleground = GetBattlefieldStatus(battlegroundId)
+    if status ~= "confirm" then return end
+    if InCombatLockdown() then
+        self.createQueue[battlegroundId] = true
+        return
+    end
     for i = 1, SAFEQUEUE_NUMPOPUPS do
         local popup = _G["SafeQueuePopup" .. i]
         if (not popup:IsVisible()) then
+            if StaticPopup_Visible("CONFIRM_BATTLEFIELD_ENTRY") then
+                StaticPopup_Hide("CONFIRM_BATTLEFIELD_ENTRY")
+            end
             popup.battleground = battleground
             popup.battlegroundId = battlegroundId
             popup:Show()
             break
         end
+    end
+end
+
+function SafeQueue:PLAYER_REGEN_ENABLED()
+    for battlegroundId, _ in pairs(self.createQueue) do
+        self.createQueue[battlegroundId] = nil
+        if (not SafeQueue_FindPopup(battlegroundId)) then self:Create(battlegroundId) end
     end
 end
 
@@ -181,7 +199,7 @@ hooksecurefunc("ToggleDropDownMenu", function(_, _, dropDownFrame)
 end)
 
 hooksecurefunc("StaticPopup_Show", function(name)
-    if name == "CONFIRM_BATTLEFIELD_ENTRY" then
+    if name == "CONFIRM_BATTLEFIELD_ENTRY" and (not InCombatLockdown()) then
         StaticPopup_Hide(name)
     end
 end)
