@@ -20,7 +20,6 @@ local UnitInBattleground = UnitInBattleground
 local hooksecurefunc = hooksecurefunc
 
 local SAFEQUEUE_NUMPOPUPS = 3
-local TOOLTIP_UPDATE_TIME = TOOLTIP_UPDATE_TIME
 local EXPIRES_FORMAT = "SafeQueue expires in |cf%s%s|r"
 local ANNOUNCE_FORMAT = "Queue popped %s"
 local ALTERAC_VALLEY = C_Map.GetMapInfo(1459).name

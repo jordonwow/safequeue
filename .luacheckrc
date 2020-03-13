@@ -45,7 +45,6 @@ globals = {
     "SecondsToTime",
     "StaticPopup_Hide",
     "StaticPopup_Visible",
-    "TOOLTIP_UPDATE_TIME",
     "UnitInBattleground",
     "WOW_PROJECT_CLASSIC",
     "WOW_PROJECT_ID",
