@@ -8,6 +8,9 @@ https://github.com/jordonwow/safequeue/issues
 Submit a pull request:
 https://github.com/jordonwow/safequeue/pulls
 
+## v3.5
+* Update for Classic 1.13.4
+
 ## v3.4
 * Fix popup not showing in combat
 
