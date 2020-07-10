@@ -189,7 +189,7 @@ function SafeQueue_PreClick(self)
         return
     end
 
-    self:SetAttribute("macrotext", "/click " .. button:GetName())
+    self:SetAttribute("macrotext", "/stopmacro [combat]\n/click " .. button:GetName())
 end
 
 hooksecurefunc("ToggleDropDownMenu", function(_, _, dropDownFrame)
