@@ -1,10 +1,9 @@
-## Interface: 11305
+## Interface: 90002
 ## Title: SafeQueue
-## Notes: Fixes the Enter Battle button for classic battlegrounds
-## Version: @project-version@
+## Notes: Removes the "Leave Queue" button for arenas and battlegrounds
+## Version: v2.7
 ## Author: Jordon
 ## DefaultState: Enabled
-## X-Curse-Project-ID: 29171
+## SavedVariables: SafeQueueDB
 
 SafeQueue.lua
-SafeQueue.xml

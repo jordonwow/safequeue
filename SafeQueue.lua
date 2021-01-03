@@ -1,204 +1,96 @@
-if WOW_PROJECT_ID ~= WOW_PROJECT_CLASSIC then return end
 
-local addonName, addon = ...
+-- SafeQueue by Jordon
 
-local C_Map = C_Map
-local CreateFrame = CreateFrame
-local DEFAULT_CHAT_FRAME = DEFAULT_CHAT_FRAME
-local ENTER_BATTLE = ENTER_BATTLE
-local GetBattlefieldPortExpiration = GetBattlefieldPortExpiration
-local GetBattlefieldStatus = GetBattlefieldStatus
-local GetBattlefieldTimeWaited = GetBattlefieldTimeWaited
-local GetMaxBattlefieldID = GetMaxBattlefieldID
-local GetTime = GetTime
-local InCombatLockdown = InCombatLockdown
-local MiniMapBattlefieldDropDown = MiniMapBattlefieldDropDown
-local PLAYER = PLAYER
-local SecondsToTime = SecondsToTime
-local StaticPopup_Visible = StaticPopup_Visible
-local UnitInBattleground = UnitInBattleground
-local hooksecurefunc = hooksecurefunc
+local SafeQueue = CreateFrame("Frame")
+local queueTime
+local queue = 0
+local remaining = 0
+SafeQueueDB = SafeQueueDB or { announce = "self" }
 
-local SAFEQUEUE_NUMPOPUPS = 3
-local EXPIRES_FORMAT = "SafeQueue expires in |cf%s%s|r"
-local ANNOUNCE_FORMAT = "Queue popped %s"
-local ALTERAC_VALLEY = C_Map.GetMapInfo(1459).name
-local WARSONG_GULCH = C_Map.GetMapInfo(1460).name
-local ARATHI_BASIN = C_Map.GetMapInfo(1461).name
-local COLORS = {
-    [ALTERAC_VALLEY] = { r = 0, g = 0.5, b = 1 },
-    [WARSONG_GULCH] = { r = 0, g = 1, b = 0 },
-    [ARATHI_BASIN] = { r = 1, g = 0.82, b = 0 },
-}
+PVPReadyDialog.leaveButton:Hide()
+PVPReadyDialog.leaveButton.Show = function() end -- Prevent other mods from showing the button
+PVPReadyDialog.enterButton:ClearAllPoints()
+PVPReadyDialog.enterButton:SetPoint("BOTTOM", PVPReadyDialog, "BOTTOM", 0, 25)
+PVPReadyDialog.label:SetPoint("TOP", 0, -22)
 
-local SafeQueue = CreateFrame("Frame", "SafeQueue")
-SafeQueue:SetScript("OnEvent", function(self, event, ...) self[event](self, ...) end)
+local function Print(msg)
+	DEFAULT_CHAT_FRAME:AddMessage("|cff33ff99SafeQueue|r: " .. msg)
+end
+
+local function PrintTime()
+	local announce = SafeQueueDB.announce
+	if announce == "off" then return end
+	local secs, str, mins = floor(GetTime() - queueTime), "Queue popped "
+	if secs < 1 then
+		str = str .. "instantly!"
+	else
+		str = str .. "after "
+		if secs >= 60 then
+			mins = floor(secs/60)
+			str = str .. mins .. "m "
+			secs = secs%60
+		end
+		if secs%60 ~= 0 then
+			str = str .. secs .. "s"
+		end
+	end
+	if announce == "self" or not IsInGroup() then
+		Print(str)
+	else
+		local group = IsInRaid() and "RAID" or "PARTY"
+		SendChatMessage(str, group)
+	end
+end
+
 SafeQueue:RegisterEvent("UPDATE_BATTLEFIELD_STATUS")
-SafeQueue:RegisterEvent("PLAYER_REGEN_ENABLED")
-SafeQueue.buttons = {}
-SafeQueue.queues = {}
-SafeQueue.createQueue = {}
-
-function SafeQueue:Print(message)
-    DEFAULT_CHAT_FRAME:AddMessage("|cff33ff99SafeQueue|r: " .. message)
-end
-
-function SafeQueue:UPDATE_BATTLEFIELD_STATUS()
-    for i = 1, GetMaxBattlefieldID() do
-        local popup = SafeQueue_FindPopup(i)
-        local status = GetBattlefieldStatus(i)
-        if status == "confirm" then
-            if self.queues[i] then
-                local secs = GetTime() - self.queues[i]
-                local message
-                if secs <= 0 then
-                    message = "instantly!"
-                else
-                    message = "after " .. SecondsToTime(secs)
-                end
-                self:Print(ANNOUNCE_FORMAT:format(message))
-                self.queues[i] = nil
-            end
-            if (not popup) then
-                self:Create(i)
-            end
-        else
-            if status == "queued" then
-                self.queues[i] = self.queues[i] or GetTime() - (GetBattlefieldTimeWaited(i) / 1000)
-            end
-            if popup then
-                SafeQueue_Hide(popup)
-            end
-        end
-    end
-end
-
-function SafeQueue:RefreshDropdown()
-    if (not self.dropdownActive) then return end
-    for i = 1, 10 do
-        local button = _G["DropDownList1Button" .. i]
-        if (not button) then break end
-        if button:GetText() == ENTER_BATTLE then
-            local battleground = _G["DropDownList1Button" .. i - 1]:GetText()
-            SafeQueue.buttons[battleground] = button
-        end
-    end
-end
-
-function SafeQueue_Hide(self)
-    if self.debug then return end
-    if self.battleground then SafeQueue.buttons[self.battleground] = nil end
-    self.battleground = nil
-    self.battlegroundId = nil
-    self:Hide()
-end
-
-function SafeQueue:Create(battlegroundId)
-    local status, battleground = GetBattlefieldStatus(battlegroundId)
-    if status ~= "confirm" then return end
-    if InCombatLockdown() then
-        self.createQueue[battlegroundId] = true
-        return
-    end
-    for i = 1, SAFEQUEUE_NUMPOPUPS do
-        local popup = _G["SafeQueuePopup" .. i]
-        if (not popup:IsVisible()) then
-            if StaticPopup_Visible("CONFIRM_BATTLEFIELD_ENTRY") then
-                StaticPopup_Hide("CONFIRM_BATTLEFIELD_ENTRY")
-            end
-            popup.battleground = battleground
-            popup.battlegroundId = battlegroundId
-            popup:Show()
-            break
-        end
-    end
-end
-
-function SafeQueue:PLAYER_REGEN_ENABLED()
-    for battlegroundId, _ in pairs(self.createQueue) do
-        self.createQueue[battlegroundId] = nil
-        if (not SafeQueue_FindPopup(battlegroundId)) then self:Create(battlegroundId) end
-    end
-end
-
-function SafeQueue_OnShow(self)
-    SafeQueue_UpdateTimer(self)
-    self.SubText:SetText(self.battleground)
-    local color = COLORS[self.battleground]
-    if color then self.SubText:SetTextColor(color.r, color.g, color.b) end
-end
-
-function SafeQueue_FindPopup(battlegroundId)
-    for i = 1, SAFEQUEUE_NUMPOPUPS do
-        local popup = _G["SafeQueuePopup" .. i]
-        if popup:IsVisible() and popup.battlegroundId == battlegroundId then
-            return popup
-        end
-    end
-end
-
-function SafeQueue_UpdateTimer(self)
-    if (not self.battlegroundId) then return end
-    local secs = GetBattlefieldPortExpiration(self.battlegroundId)
-    if secs <= 0 then secs = 1 end
-    local color
-    if secs > 20 then
-        color = "f20ff20"
-    elseif secs > 10 then
-        color = "fffff00"
-    else
-        color = "fff0000"
-    end
-    self.text:SetText(EXPIRES_FORMAT:format(color, SecondsToTime(secs)))
-end
-
-function SafeQueue_OnUpdate(self, elapsed)
-    if (not self:IsVisible()) then return end
-    local timer = self.timer
-    timer = timer - elapsed
-    if timer <= 0 then
-        if (not self.battlegroundId) or GetBattlefieldStatus(self.battlegroundId) ~= "confirm" then
-            SafeQueue_Hide(self)
-            return
-        end
-        SafeQueue_UpdateTimer(self)
-    end
-    self.timer = timer
-end
-
-function SafeQueue:GetButton(battleground)
-    if (not self.dropdownActive) then return end
-    return self.buttons[battleground]
-end
-
-function SafeQueue_PreClick(self)
-    SafeQueue:RefreshDropdown()
-
-    if InCombatLockdown() then return end
-
-    self:SetAttribute("macrotext", "")
-
-    if UnitInBattleground(PLAYER) then return end
-
-    local button = SafeQueue:GetButton(self:GetParent().battleground)
-
-    if (not button) then
-        self:SetAttribute("macrotext", "/click MiniMapBattlefieldFrame RightButton\n" ..
-            "/click MiniMapBattlefieldFrame RightButton"
-        )
-        return
-    end
-
-    self:SetAttribute("macrotext", "/stopmacro [combat]\n/click " .. button:GetName())
-end
-
-hooksecurefunc("ToggleDropDownMenu", function(_, _, dropDownFrame)
-    SafeQueue.dropdownActive = dropDownFrame == MiniMapBattlefieldDropDown
-    SafeQueue:RefreshDropdown()
+SafeQueue:SetScript("OnEvent", function()
+	local queued
+	for i=1, GetMaxBattlefieldID() do
+		local status = GetBattlefieldStatus(i)
+		if status == "queued" then
+			queued = true
+			if not queueTime then queueTime = GetTime() end
+		elseif status == "confirm" then
+			if queueTime then
+				PrintTime()
+				queueTime = nil
+				remaining = 0
+				queue = i
+			end					
+		end
+		break
+	end
+	if not queued and queueTime then queueTime = nil end
 end)
 
-hooksecurefunc("StaticPopup_Show", function(name)
-    if name == "CONFIRM_BATTLEFIELD_ENTRY" and (not InCombatLockdown()) then
-        StaticPopup_Hide(name)
-    end
+SafeQueue:SetScript("OnUpdate", function(self)
+	if PVPReadyDialog_Showing(queue) then
+		local secs = GetBattlefieldPortExpiration(queue)
+		if secs and secs > 0 and remaining ~= secs then
+			remaining = secs
+			local color = secs > 20 and "f20ff20" or secs > 10 and "fffff00" or "fff0000"
+			PVPReadyDialog.label:SetText("Expires in |cf"..color.. SecondsToTime(secs) .. "|r")
+		end
+	end
 end)
+
+SlashCmdList.SafeQueue = function(msg)
+	msg = msg or ""
+	local cmd, arg = string.split(" ", msg, 2)
+	cmd = string.lower(cmd or "")
+	arg = string.lower(arg or "")
+	if cmd == "announce" then
+		if arg == "off" or arg == "self" or arg == "group" then
+			SafeQueueDB.announce = arg
+			Print("Announce set to " .. arg)
+		else
+			Print("Announce set to " .. SafeQueueDB.announce)
+			Print("Announce types are \"off\", \"self\", and \"group\"")
+		end
+	else
+		DEFAULT_CHAT_FRAME:AddMessage("|cff33ff99SafeQueue v2.7|r")
+		Print("/sq announce : " .. SafeQueueDB.announce)
+	end
+end
+SLASH_SafeQueue1 = "/safequeue"
+SLASH_SafeQueue2 = "/sq"
