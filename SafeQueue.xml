@@ -7,21 +7,20 @@
     <Scripts>
         <OnLoad>
             self.timer = TOOLTIP_UPDATE_TIME
+            local BACKDROP_DIALOG_32_32 = BACKDROP_DIALOG_32_32 or {
+                bgFile = [[Interface\DialogFrame\UI-DialogBox-Background]],
+                edgeFile = [[Interface\DialogFrame\UI-DialogBox-Border]],
+                tile = true,
+                tileSize = 32,
+                edgeSize = 32,
+                insets = { left = 11, right = 12, top = 12, bottom = 11 },
+            }
+            if BackdropTemplateMixin then Mixin(self, BackdropTemplateMixin) end
+            self:SetBackdrop(BACKDROP_DIALOG_32_32)
         </OnLoad>
         <OnUpdate function="SafeQueue_OnUpdate"/>
         <OnShow function="SafeQueue_OnShow"/>
     </Scripts>
-    <Backdrop bgFile="Interface\DialogFrame\UI-DialogBox-Background-Dark" edgeFile="Interface\DialogFrame\UI-DialogBox-Border" tile="true">
-        <BackgroundInsets>
-            <AbsInset left="11" right="11" top="11" bottom="11"/>
-        </BackgroundInsets>
-        <TileSize>
-            <AbsValue val="32"/>
-        </TileSize>
-        <EdgeSize>
-            <AbsValue val="32"/>
-        </EdgeSize>
-    </Backdrop>
     <Layers>
         <Layer level="ARTWORK">
             <FontString name="$parentText" parentKey="text" inherits="GameFontHighlight">

@@ -46,8 +46,8 @@ globals = {
     "StaticPopup_Hide",
     "StaticPopup_Visible",
     "UnitInBattleground",
-    "WOW_PROJECT_CLASSIC",
     "WOW_PROJECT_ID",
+    "WOW_PROJECT_MAINLINE",
     "_G",
     "hooksecurefunc",
 }

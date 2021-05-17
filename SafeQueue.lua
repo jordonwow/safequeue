@@ -1,4 +1,4 @@
-if WOW_PROJECT_ID ~= WOW_PROJECT_CLASSIC then return end
+if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then return end
 
 local addonName, addon = ...
 
@@ -79,15 +79,15 @@ function SafeQueue:RefreshDropdown()
         local button = _G["DropDownList1Button" .. i]
         if (not button) then break end
         if button:GetText() == ENTER_BATTLE then
-            local battleground = _G["DropDownList1Button" .. i - 1]:GetText()
-            SafeQueue.buttons[battleground] = button
+            local battlegroundId = button.arg1
+            self.buttons[battlegroundId] = button
         end
     end
 end
 
 function SafeQueue_Hide(self)
     if self.debug then return end
-    if self.battleground then SafeQueue.buttons[self.battleground] = nil end
+    if self.battlegroundId then SafeQueue.buttons[self.battlegroundId] = nil end
     self.battleground = nil
     self.battlegroundId = nil
     self:Hide()
@@ -108,6 +108,10 @@ function SafeQueue:Create(battlegroundId)
             end
             popup.battleground = battleground
             popup.battlegroundId = battlegroundId
+            -- if (not popup.SetBackdrop) then
+            --     local border = CreateFrame("Frame", nil, popup, "DialogBorderTemplate")
+            --     border:SetAllPoints(popup)
+            -- end
             popup:Show()
             break
         end
@@ -166,9 +170,9 @@ function SafeQueue_OnUpdate(self, elapsed)
     self.timer = timer
 end
 
-function SafeQueue:GetButton(battleground)
+function SafeQueue:GetButton(battlegroundId)
     if (not self.dropdownActive) then return end
-    return self.buttons[battleground]
+    return self.buttons[battlegroundId]
 end
 
 function SafeQueue_PreClick(self)
@@ -180,7 +184,7 @@ function SafeQueue_PreClick(self)
 
     if UnitInBattleground(PLAYER) then return end
 
-    local button = SafeQueue:GetButton(self:GetParent().battleground)
+    local button = SafeQueue:GetButton(self:GetParent().battlegroundId)
 
     if (not button) then
         self:SetAttribute("macrotext", "/click MiniMapBattlefieldFrame RightButton\n" ..

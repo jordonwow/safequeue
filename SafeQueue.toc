@@ -1,4 +1,5 @@
-## Interface: 11306
+## Interface: 20501
+## Interface-Classic: 11307
 ## Title: SafeQueue
 ## Notes: Fixes the Enter Battle button for classic battlegrounds
 ## Version: @project-version@
