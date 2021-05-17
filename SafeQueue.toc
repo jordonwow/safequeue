@@ -6,6 +6,8 @@
 ## Author: Jordon
 ## DefaultState: Enabled
 ## X-Curse-Project-ID: 29171
+## X-Wago-ID: 0mKOq1Nx
+## X-WoWI-ID: 19494
 
 SafeQueue.lua
 SafeQueue.xml

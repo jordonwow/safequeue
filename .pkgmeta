@@ -1,5 +1,9 @@
 package-as: SafeQueue
 
 manual-changelog:
-    filename: README.md
-    markup-type: markdown
+  filename: CHANGELOG.md
+  markup-type: markdown
+
+ignore:
+  - README.md
+  - generate_changelog.sh
