@@ -6,6 +6,7 @@
     </Size>
     <Scripts>
         <OnLoad>
+            if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then return end
             self.timer = TOOLTIP_UPDATE_TIME
             local BACKDROP_DIALOG_32_32 = BACKDROP_DIALOG_32_32 or {
                 bgFile = [[Interface\DialogFrame\UI-DialogBox-Background]],
@@ -17,9 +18,14 @@
             }
             if BackdropTemplateMixin then Mixin(self, BackdropTemplateMixin) end
             self:SetBackdrop(BACKDROP_DIALOG_32_32)
+            self:SetScript("OnUpdate", SafeQueue_OnUpdate)
+            self:SetScript("OnShow", SafeQueue_OnShow)
+            self.EnterButton:SetScript("PreClick", SafeQueue_PreClick)
         </OnLoad>
-        <OnUpdate function="SafeQueue_OnUpdate"/>
-        <OnShow function="SafeQueue_OnShow"/>
+        <OnHide>
+            self.battleground = nil
+            self.battlefieldId = nil
+        </OnHide>
     </Scripts>
     <Layers>
         <Layer level="ARTWORK">
@@ -56,25 +62,11 @@
                 </Anchor>
             </Anchors>
         </Button>
-        <Button name="$parentClickButton" inherits="SecureActionButtonTemplate" registerForClicks="LeftButtonUp" parentKey="ClickButton">
-            <Attributes>
-                <Attribute name="type" value="macro"/>
-            </Attributes>
-            <Scripts>
-                <PreClick function="SafeQueue_PreClick"/>
-            </Scripts>
-        </Button>
         <Button name="$parentEnterButton" inherits="UIPanelButtonTemplate, SecureActionButtonTemplate" registerForClicks="LeftButtonUp" text="ENTER_BATTLE" parentKey="EnterButton">
             <Size x="128" y="21"/>
             <Attributes>
                 <Attribute name="type" value="macro"/>
             </Attributes>
-            <Scripts>
-                <OnLoad>
-                    local name = self:GetParent():GetName()
-                    self:SetAttribute("macrotext", ("/click %sClickButton\n/click %sClickButton"):format(name, name))
-                </OnLoad>
-            </Scripts>
             <Anchors>
                 <Anchor point="BOTTOM" relativeTo="$parent" relativePoint="BOTTOM" x="0" y="26"/>
             </Anchors>

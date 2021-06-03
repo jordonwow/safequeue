@@ -34,6 +34,7 @@ globals = {
     "InCombatLockdown",
     "MiniMapBattlefieldDropDown",
     "PLAYER",
+    "PVPReadyDialog",
     "SafeQueue_FindPopup",
     "SafeQueue_Hide",
     "SafeQueue_OnShow",
