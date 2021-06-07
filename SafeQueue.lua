@@ -57,7 +57,6 @@ if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
         self.enterButton:SetPoint("BOTTOM", self, "BOTTOM", 0, 25)
     end)
 else
-    local SAFEQUEUE_NUMPOPUPS = 3
     local ALTERAC_VALLEY = C_Map.GetMapInfo(1459).name
     local WARSONG_GULCH = C_Map.GetMapInfo(1460).name
     local ARATHI_BASIN = C_Map.GetMapInfo(1461).name
@@ -66,8 +65,8 @@ else
         [WARSONG_GULCH] = { r = 0, g = 1, b = 0 },
         [ARATHI_BASIN] = { r = 1, g = 0.82, b = 0 },
     }
+    SafeQueue.popup = SafeQueuePopup
     SafeQueue:RegisterEvent("PLAYER_REGEN_ENABLED")
-    SafeQueue.createQueue = {}
 
     function SafeQueue_OnShow(self)
         self.text:SetText(GetTimerText(self.battlefieldId))
@@ -80,37 +79,20 @@ else
         local status, battleground = GetBattlefieldStatus(battlefieldId)
         if status ~= "confirm" then return end
         if InCombatLockdown() then
-            self.createQueue[battlefieldId] = true
+            self.createPopup = battlefieldId
             return
         end
-        for i = 1, SAFEQUEUE_NUMPOPUPS do
-            local popup = _G["SafeQueuePopup" .. i]
-            if (not popup:IsVisible()) then
-                if StaticPopup_Visible("CONFIRM_BATTLEFIELD_ENTRY") then
-                    StaticPopup_Hide("CONFIRM_BATTLEFIELD_ENTRY")
-                end
-                popup.battleground = battleground
-                popup.battlefieldId = battlefieldId
-                popup:Show()
-                break
-            end
+        self.createPopup = nil
+        if StaticPopup_Visible("CONFIRM_BATTLEFIELD_ENTRY") then
+            StaticPopup_Hide("CONFIRM_BATTLEFIELD_ENTRY")
         end
-    end
-
-    function SafeQueue_FindPopup(battlefieldId)
-        for i = 1, SAFEQUEUE_NUMPOPUPS do
-            local popup = _G["SafeQueuePopup" .. i]
-            if popup:IsVisible() and popup.battlefieldId == battlefieldId then
-                return popup
-            end
-        end
+        self.popup.battleground = battleground
+        self.popup.battlefieldId = battlefieldId
+        self.popup:Show()
     end
 
     function SafeQueue:PLAYER_REGEN_ENABLED()
-        for battlefieldId, _ in pairs(self.createQueue) do
-            self.createQueue[battlefieldId] = nil
-            if (not SafeQueue_FindPopup(battlefieldId)) then self:Create(battlefieldId) end
-        end
+        if self.createPopup then self:Create(self.createPopup) end
     end
 
     function SafeQueue_OnUpdate(self, elapsed)

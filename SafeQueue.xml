@@ -73,19 +73,8 @@
         </Button>
     </Frames>
 </Frame>
-<Frame name="SafeQueuePopup1" inherits="SafeQueuePopupTemplate" parent="UIParent" id="1">
+<Frame name="SafeQueuePopup" inherits="SafeQueuePopupTemplate" parent="UIParent" id="1">
     <Anchors>
         <Anchor point="TOP" x="0" y="-135"/>
     </Anchors>
 </Frame>
-<Frame name="SafeQueuePopup2" inherits="SafeQueuePopupTemplate" parent="UIParent" id="2">
-    <Anchors>
-        <Anchor point="TOP" relativeTo="SafeQueuePopup1" relativePoint="BOTTOM"/>
-    </Anchors>
-</Frame>
-<Frame name="SafeQueuePopup3" inherits="SafeQueuePopupTemplate" parent="UIParent" id="3">
-    <Anchors>
-        <Anchor point="TOP" relativeTo="SafeQueuePopup2" relativePoint="BOTTOM"/>
-    </Anchors>
-</Frame>
-</Ui>
