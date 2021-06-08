@@ -18,12 +18,14 @@ local PLAYER = PLAYER
 local PVPReadyDialog = PVPReadyDialog
 local SecondsToTime = SecondsToTime
 local StaticPopup_Visible = StaticPopup_Visible
+local TOOLTIP_UPDATE_TIME = TOOLTIP_UPDATE_TIME
 local UnitInBattleground = UnitInBattleground
 local hooksecurefunc = hooksecurefunc
 
 local SafeQueue = CreateFrame("Frame", "SafeQueue")
 SafeQueue:SetScript("OnEvent", function(self, event, ...) self[event](self, ...) end)
 SafeQueue:RegisterEvent("UPDATE_BATTLEFIELD_STATUS")
+SafeQueue.timer = TOOLTIP_UPDATE_TIME
 
 local EXPIRES_FORMAT = (WOW_PROJECT_ID == WOW_PROJECT_MAINLINE and "Expires in " or "SafeQueue expires in ") ..
     "|cf%s%s|r"
@@ -45,10 +47,14 @@ local function GetTimerText(battlefieldId)
 end
 
 if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
-    SafeQueue:SetScript("OnUpdate", function()
-        if PVPReadyDialog:IsShown() and PVPReadyDialog.activeIndex then
+    SafeQueue:SetScript("OnUpdate", function(self, elapsed)
+        if (not PVPReadyDialog:IsShown()) or (not PVPReadyDialog.activeIndex) then return end
+        local timer = self.timer
+        timer = timer - elapsed
+        if timer <= 0 then
             PVPReadyDialog.label:SetText(GetTimerText(PVPReadyDialog.activeIndex))
         end
+        self.timer = timer
     end)
 
     hooksecurefunc("PVPReadyDialog_Display", function(self)
@@ -68,71 +74,60 @@ else
     SafeQueue.popup = SafeQueuePopup
     SafeQueue:RegisterEvent("PLAYER_REGEN_ENABLED")
 
-    function SafeQueue_OnShow(self)
-        self.text:SetText(GetTimerText(self.battlefieldId))
-        self.SubText:SetText(self.battleground)
-        local color = COLORS[self.battleground]
-        if color then self.SubText:SetTextColor(color.r, color.g, color.b) end
-    end
-
     function SafeQueue:Create(battlefieldId)
+        if SafeQueue:FindPopup(battlefieldId) then return end
         local status, battleground = GetBattlefieldStatus(battlefieldId)
         if status ~= "confirm" then return end
         if InCombatLockdown() then
             self.createPopup = battlefieldId
             return
         end
-        self.createPopup = nil
         if StaticPopup_Visible("CONFIRM_BATTLEFIELD_ENTRY") then
             StaticPopup_Hide("CONFIRM_BATTLEFIELD_ENTRY")
         end
+        self.createPopup = nil
+        self.popup.hidePopup = nil
         self.popup.battleground = battleground
         self.popup.battlefieldId = battlefieldId
+        self.popup.text:SetText(GetTimerText(battlefieldId))
+        self.popup.SubText:SetText(battleground)
+        local color = COLORS[battleground]
+        if color then self.popup.SubText:SetTextColor(color.r, color.g, color.b) end
+        self.popup.EnterButton:SetAttribute("macrotext", "/click MiniMapBattlefieldFrame RightButton\n" ..
+            "/click DropDownList1Button" .. ((battlefieldId * 3) - 1))
         self.popup:Show()
     end
 
+    function SafeQueue:FindPopup(battlefieldId)
+        if self.popup:IsVisible() and self.popup.battlefieldId == battlefieldId then
+            return self.popup
+        end
+    end
+
     function SafeQueue:PLAYER_REGEN_ENABLED()
+        if self.popup.hidePopup then self.popup:Hide() end
         if self.createPopup then self:Create(self.createPopup) end
     end
 
-    function SafeQueue_OnUpdate(self, elapsed)
-        if (not self:IsVisible()) then return end
+    SafeQueue:SetScript("OnUpdate", function(self, elapsed)
+        local popup = self.popup
+        if (not popup:IsVisible()) then return end
         local timer = self.timer
         timer = timer - elapsed
         if timer <= 0 then
-            if (not self.battlefieldId) or GetBattlefieldStatus(self.battlefieldId) ~= "confirm" then
-                self:Hide()
+            if (not popup.battlefieldId) or GetBattlefieldStatus(popup.battlefieldId) ~= "confirm" then
+                popup:Hide()
                 return
             end
-            self.text:SetText(GetTimerText(self.battlefieldId))
+            popup.text:SetText(GetTimerText(popup.battlefieldId))
         end
         self.timer = timer
-    end
+    end)
 
-    local function GetButtonNameById(id)
-        local n
-        if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
-            n = id * 2
-        else
-            n = (id * 3) - 1
-        end
-        return "DropDownList1Button" .. n
-    end
-
-    function SafeQueue_PreClick(self)
-        if InCombatLockdown() then return end
-        self:SetAttribute("macrotext", "")
-        if UnitInBattleground(PLAYER) then return end
-        local id = self:GetParent().battlefieldId
-        if (not id) then return end
-        local button = "DropDownList1Button" .. GetButtonNameById(id)
-        self:SetAttribute("macrotext", "/click MiniMapBattlefieldFrame RightButton\n/click " .. GetButtonNameById(id))
-    end
-
-    hooksecurefunc("StaticPopup_Show", function(name)
-        if name == "CONFIRM_BATTLEFIELD_ENTRY" and (not InCombatLockdown()) then
-            StaticPopup_Hide(name)
-        end
+    hooksecurefunc("StaticPopup_Show", function(name, _, _, i)
+        if name ~= "CONFIRM_BATTLEFIELD_ENTRY" then return end
+        if InCombatLockdown() and (not SafeQueue:FindPopup(i)) then return end
+        StaticPopup_Hide(name)
     end)
 end
 
@@ -144,7 +139,7 @@ end
 
 function SafeQueue:UPDATE_BATTLEFIELD_STATUS()
     for i = 1, GetMaxBattlefieldID() do
-        local popup = SafeQueue_FindPopup and SafeQueue_FindPopup(i)
+        local popup = SafeQueue.FindPopup and SafeQueue:FindPopup(i)
         local status = GetBattlefieldStatus(i)
         if status == "confirm" then
             if self.queues[i] then

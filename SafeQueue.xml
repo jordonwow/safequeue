@@ -6,8 +6,6 @@
     </Size>
     <Scripts>
         <OnLoad>
-            if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then return end
-            self.timer = TOOLTIP_UPDATE_TIME
             local BACKDROP_DIALOG_32_32 = BACKDROP_DIALOG_32_32 or {
                 bgFile = [[Interface\DialogFrame\UI-DialogBox-Background]],
                 edgeFile = [[Interface\DialogFrame\UI-DialogBox-Border]],
@@ -18,13 +16,15 @@
             }
             if BackdropTemplateMixin then Mixin(self, BackdropTemplateMixin) end
             self:SetBackdrop(BACKDROP_DIALOG_32_32)
-            self:SetScript("OnUpdate", SafeQueue_OnUpdate)
-            self:SetScript("OnShow", SafeQueue_OnShow)
-            self.EnterButton:SetScript("PreClick", SafeQueue_PreClick)
         </OnLoad>
         <OnHide>
+            if InCombatLockdown() then
+                self.hidePopup = true
+                return
+            end
             self.battleground = nil
             self.battlefieldId = nil
+            self.EnterButton:SetAttribute("macrotext", "")
         </OnHide>
     </Scripts>
     <Layers>
@@ -78,3 +78,4 @@
         <Anchor point="TOP" x="0" y="-135"/>
     </Anchors>
 </Frame>
+</Ui>
