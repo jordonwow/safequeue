@@ -145,7 +145,7 @@ function SafeQueue:UPDATE_BATTLEFIELD_STATUS()
             if self.queues[i] then
                 local secs = GetTime() - self.queues[i]
                 local message
-                if secs <= 0 then
+                if secs < 1 then
                     message = "instantly!"
                 else
                     message = "after " .. SecondsToTime(secs)
