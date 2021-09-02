@@ -82,8 +82,8 @@ else
             self.createPopup = battlefieldId
             return
         end
-        if StaticPopup_Visible("CONFIRM_BATTLEFIELD_ENTRY") then
-            StaticPopup_Hide("CONFIRM_BATTLEFIELD_ENTRY")
+        if PVPReadyDialog:IsShown() then
+            PVPReadyDialog:Hide()
         end
         self.createPopup = nil
         self.popup.hidePopup = nil
@@ -124,10 +124,9 @@ else
         self.timer = timer
     end)
 
-    hooksecurefunc("StaticPopup_Show", function(name, _, _, i)
-        if name ~= "CONFIRM_BATTLEFIELD_ENTRY" then return end
+    hooksecurefunc("PVPReadyDialog_Display", function(_, i)
         if InCombatLockdown() and (not SafeQueue:FindPopup(i)) then return end
-        StaticPopup_Hide(name)
+        PVPReadyDialog:Hide()
     end)
 end
 
