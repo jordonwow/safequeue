@@ -3,6 +3,9 @@
 
 local addonName, addon = ...
 
+-- Classic Era isn't updated yet
+if (not PVPReadyDialog) then return end
+
 local CreateFrame = CreateFrame
 local DEFAULT_CHAT_FRAME = DEFAULT_CHAT_FRAME
 local GetBattlefieldPortExpiration = GetBattlefieldPortExpiration
