@@ -10,5 +10,13 @@
 ## X-Wago-ID: 0mKOq1Nx
 ## X-WoWI-ID: 19494
 
+#@no-lib-strip@
+Libs\LibStub\LibStub.lua
+Libs\LibFrameFade\lib.xml
+#@end-no-lib-strip@
+
+Locales\Locales.xml
 SafeQueue.xml
 SafeQueue.lua
+Classic.lua
+

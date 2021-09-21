@@ -2,6 +2,7 @@ std = "lua51"
 max_line_length = false
 exclude_files = {
     ".luacheckrc",
+    "Libs/",
 }
 ignore = {
     "11./SLASH_.*",
@@ -12,7 +13,6 @@ ignore = {
     "431",
     "432",
 }
-
 globals = {
     "C_Map",
     "CreateFrame",
@@ -24,17 +24,24 @@ globals = {
     "GetMaxBattlefieldID",
     "GetTime",
     "InCombatLockdown",
-    "MiniMapBattlefieldDropDown",
-    "PLAYER",
+    "LibStub",
     "PVPReadyDialog",
-    "SafeQueuePopup",
+    "PVPReadyDialog_Display",
+    "PlaySound",
+    "REQUIRES_RELOAD",
+    "SOUNDKIT",
+    "SafeQueue",
     "SecondsToTime",
+    "StaticPopupSpecial_Hide",
+    "StaticPopup_FindVisible",
     "StaticPopup_Hide",
-    "StaticPopup_Visible",
     "TOOLTIP_UPDATE_TIME",
-    "UnitInBattleground",
+    "WOW_PROJECT_BURNING_CRUSADE_CLASSIC",
+    "WOW_PROJECT_CLASSIC",
     "WOW_PROJECT_ID",
     "WOW_PROJECT_MAINLINE",
-    "_G",
+    "format",
     "hooksecurefunc",
+    "issecurevariable",
+    "nop",
 }
