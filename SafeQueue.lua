@@ -2,7 +2,7 @@
 -- SafeQueue by Jordon
 
 local SafeQueue = SafeQueue
-local L = LibStub("AceLocale-3.0"):GetLocale("OmniBar")
+local L = LibStub("AceLocale-3.0"):GetLocale("SafeQueue")
 
 local CreateFrame = CreateFrame
 local DEFAULT_CHAT_FRAME = DEFAULT_CHAT_FRAME
