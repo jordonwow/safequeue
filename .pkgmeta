@@ -1,14 +1,6 @@
 package-as: SafeQueue
 
 externals:
-  Libs/LibStub: https://repos.wowace.com/wow/libstub/trunk
-  Libs/AceLocale-3.0: https://repos.wowace.com/wow/ace3/trunk/AceLocale-3.0
+  Libs/LibStub: https://repos.curseforge.com/wow/libstub/trunk
+  Libs/AceLocale-3.0: https://repos.curseforge.com/wow/ace3/trunk/AceLocale-3.0
   Libs/LibFrameFade: https://github.com/Meorawr/LibFrameFade
-
-manual-changelog:
-  filename: CHANGELOG.md
-  markup-type: markdown
-
-ignore:
-  - README.md
-  - generate_changelog.sh
