@@ -24,6 +24,21 @@
         </OnLoad>
     </Scripts>
     <Layers>
+        <Layer level="BACKGROUND">
+            <Texture name="$parentBattlegroundTexture" parentKey="BattlegroundTexture">
+                <Size>
+                    <AbsDimension x="320" y="124"/>
+                </Size>
+                <Anchors>
+                    <Anchor point="CENTER" relativeTo="$parent" relativePoint="CENTER" x="0" y="0"/>
+                </Anchors>
+                <Scripts>
+                    <OnLoad>
+                        self:Hide() -- Ensure the texture starts hidden
+                    </OnLoad>
+                </Scripts>
+            </Texture>
+        </Layer>
         <Layer level="ARTWORK">
             <FontString name="$parentText" parentKey="text" inherits="GameFontHighlight">
                 <Size>
@@ -74,7 +89,7 @@
         </Button>
     </Frames>
 </Frame>
-<Frame name="SafeQueue" inherits="SafeQueuePopupTemplate" parent="UIParent" id="1">
+<Frame name="SafeQueue" inherits="SafeQueuePopupTemplate" parent="UIParent" id="1" movable="true" enableMouse="true">
     <Anchors>
         <Anchor point="TOP" x="0" y="-135"/>
     </Anchors>
