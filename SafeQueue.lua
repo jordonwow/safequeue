@@ -1,4 +1,3 @@
-
 -- SafeQueue by Jordon
 
 local SafeQueue = SafeQueue
@@ -33,7 +32,8 @@ function SafeQueue:SetExpiresText()
     else
         color = "ff0000"
     end
-    local text = L["SafeQueue expires in |cff%s%s|r"]:format(color, SecondsToTime(secs))
+    -- Corrected syntax for text formatting
+    local text = ("Expires in |cff%s%s|r"):format(color, SecondsToTime(secs))
     self.text:SetText(text)
     if PVPReadyDialog then
         if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
