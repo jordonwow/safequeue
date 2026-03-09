@@ -97,16 +97,30 @@ function SafeQueue:UPDATE_BATTLEFIELD_STATUS()
     end
 end
 
+-- Setup Blizzard's EnterBattleButton to be shown and enabled
+function SafeQueue:SetupBlizzardButton()
+    if PVPReadyDialog and PVPReadyDialog.EnterBattleButton then
+        PVPReadyDialog.EnterBattleButton:Show()
+        PVPReadyDialog.EnterBattleButton:Enable()
+    end
+end
+
 if PVPReadyDialog_Display then
     if PVPReadyDialog.label then PVPReadyDialog.label:SetWidth(250) end
     hooksecurefunc("PVPReadyDialog_Display", function(self, i)
         self = self or PVPReadyDialog
         if self.hideButton then self.hideButton:Hide() end
         if self.leaveButton then self.leaveButton:Hide() end
-        self.enterButton:ClearAllPoints()
-        self.enterButton:SetPoint("BOTTOM", self, "BOTTOM", 0, 25)
+        
         SafeQueue.battlefieldId = i
         if SafeQueue.ShowPopup then SafeQueue:ShowPopup() end
         SafeQueue:SetExpiresText()
+        
+        -- Position button using EzQ's method
+        SafeQueue:SetupBlizzardButton()
+        if PVPReadyDialog and PVPReadyDialog.EnterBattleButton then
+            PVPReadyDialog.EnterBattleButton:ClearAllPoints()
+            PVPReadyDialog.EnterBattleButton:SetPoint("CENTER", PVPReadyDialog, "CENTER", 0, -40)
+        end
     end)
 end
