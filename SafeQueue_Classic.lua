@@ -18,13 +18,9 @@ local format = format
 local hooksecurefunc = hooksecurefunc
 local issecurevariable = issecurevariable
 
-local alteracValleyInfo = GetMapInfo(1459)
-local warsongGulchInfo = GetMapInfo(1460)
-local arathiBasinInfo = GetMapInfo(1461)
-
-local ALTERAC_VALLEY = alteracValleyInfo and alteracValleyInfo.name or "Alterac Valley"
-local WARSONG_GULCH = warsongGulchInfo and warsongGulchInfo.name or "Warsong Gulch"
-local ARATHI_BASIN = arathiBasinInfo and arathiBasinInfo.name or "Arathi Basin"
+local ALTERAC_VALLEY = GetMapInfo(1459).name
+local WARSONG_GULCH = GetMapInfo(1460).name
+local ARATHI_BASIN = GetMapInfo(1461).name
 
 local BATTLEGROUND_COLORS = {
     default = "ffd100",
@@ -32,33 +28,6 @@ local BATTLEGROUND_COLORS = {
     [WARSONG_GULCH] = "00ff00",
     [ARATHI_BASIN] = "ffd100",
 }
--- Textures for the battlegrounds
-local battlegroundTextures = {
-    ["Warsong Gulch"] = "Interface\\AddOns\\SafeQueue\\Media\\Textures\\wsglogo.png",
-    ["Alterac Valley"] = "Interface\\AddOns\\SafeQueue\\Media\\Textures\\avlogo.png",
-    ["Arathi Basin"] = "Interface\\AddOns\\SafeQueue\\Media\\Textures\\ablogo.png",
-}
-
-function SafeQueue:SetBackground(battleground)
-    if not self.BattlegroundTexture then
-        print("BattlegroundTexture is nil!")
-        return
-    end
-
-    local texturePath = battlegroundTextures[battleground]
-    if texturePath then
-        self.BattlegroundTexture:SetTexture(texturePath)
-        self.BattlegroundTexture:SetTexCoord(0, 1, 0, 1)
-        self.BattlegroundTexture:SetSize(300, 115) -- Match popup template dimensions
-        self.BattlegroundTexture:SetDrawLayer("BACKGROUND") -- Ensure texture is rendered below the popup
-        self.BattlegroundTexture:SetAlpha(0.7) -- Set alpha 
-        self.BattlegroundTexture:Show()
-    else
-        print("No texture found for:", battleground)
-        self.BattlegroundTexture:Hide()
-    end
-end
-
 
 if PVPReadyDialog then
     PVPReadyDialog:SetHeight(120)
@@ -113,7 +82,6 @@ SafeQueue:SetScript("OnShow", function(self)
     self.showPending = nil
     self.hidePending = nil
 
-    self:SetBackground(battleground) -- Ensure the background is set when the popup is shown
     self:SetExpiresText()
     self.SubText:SetText(format("|cff%s%s|r", self.color, battleground))
     local color = self.color and self.color.rgb
@@ -134,10 +102,6 @@ function SafeQueue:ShowPopup()
     if (not battlefieldId) then return end
     local status, battleground = GetBattlefieldStatus(battlefieldId)
     if status ~= "confirm" then return end
-
-    -- Reset the minimized state when showing the popup
-    self.isMinimized = false
-
     self.battleground = battleground
     self.color = BATTLEGROUND_COLORS[battleground] or BATTLEGROUND_COLORS.default
     self:SetExpiresText()
@@ -190,49 +154,3 @@ function SafeQueue:SetMacroText()
         self.EnterButton:SetAttribute("macrotext", macrotext)
     end
 end
-
--- Ensure the frame is movable
-SafeQueue:SetMovable(true)
-SafeQueue:EnableMouse(true)
-SafeQueue:RegisterForDrag("LeftButton")
-SafeQueue:SetScript("OnDragStart", function(self)
-    if InCombatLockdown() then return end -- Prevent dragging during combat
-    self:StartMoving()
-end)
-SafeQueue:SetScript("OnDragStop", function(self)
-    self:StopMovingOrSizing()
-    self:SavePosition() -- Save position when dragging stops
-end)
-
--- Function to save the window's position
-function SafeQueue:SavePosition()
-    if not SafeQueueDB then SafeQueueDB = {} end
-    local point, _, relativePoint, x, y = self:GetPoint()
-    SafeQueueDB.position = { point = point, relativePoint = relativePoint, x = x, y = y }
-end
-
--- Function to restore the window's position
-function SafeQueue:RestorePosition()
-    if SafeQueueDB and SafeQueueDB.position then
-        local pos = SafeQueueDB.position
-        self:ClearAllPoints()
-        self:SetPoint(pos.point, UIParent, pos.relativePoint, pos.x, pos.y)
-    else
-        -- Default position if no saved position exists
-        self:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
-    end
-end
-
--- Restore position when the addon loads
-SafeQueue:RestorePosition()
-
-local LDB = LibStub("LibDataBroker-1.1", true)
-local LDBIcon = LibStub("LibDBIcon-1.0", true)
-
-local hideButton = CreateFrame("Button", nil, SafeQueue, "UIPanelCloseButton")
-hideButton:SetPoint("TOPRIGHT", SafeQueue, "TOPRIGHT", -3, -3)
-hideButton:SetScript("OnClick", function()
-    SafeQueue.isMinimized = true -- Set a flag to track the minimized state
-    SafeQueue:Hide() -- Hide the popup
-end)
-
